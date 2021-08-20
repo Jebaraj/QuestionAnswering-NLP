@@ -58,7 +58,7 @@ Since the SQuAD authors collected three gold answers for every question, the gol
 
 Figure 5 Ground truth answer span length distribution: ![](media/fig5.PNG)
 
-Figure 6 Model predicted answer span length distribution ![](media/Squad_dev_ans_spread_model_pred.PNG)
+Figure 6 Model predicted answer span length distribution ![](media/fig6.PNG)
 
 One can also clearly see from Figure 6, that model predicted answer spans also has a similar distribution to that of the gold answer span lengths.
 While the macro-averaged F1 score for the best model on the SQuAD dev set is 66.16, it does not explain how the F1 scores vary per example. Figure 7 shows the spread of the F1 score for each example. One can clearly see that there are several occurrences of 0 F1 score, which is impacting the overall macro-averaged F1 score. Improving this will help to improve the overall F1 score of the model.
