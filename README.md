@@ -63,22 +63,23 @@ Figure 6 Model predicted answer span length distribution ![](media/fig6.PNG)
 One can also clearly see from Figure 6, that model predicted answer spans also has a similar distribution to that of the gold answer span lengths.
 While the macro-averaged F1 score for the best model on the SQuAD dev set is 66.16, it does not explain how the F1 scores vary per example. Figure 7 shows the spread of the F1 score for each example. One can clearly see that there are several occurrences of 0 F1 score, which is impacting the overall macro-averaged F1 score. Improving this will help to improve the overall F1 score of the model.
 
-
+Figure 7 F1 score distribution (majority of loss is due to 0 F1 score) ![](media/fig7.PNG)
 
 Next, when we see the average F1 score of the model against the gold answer spans we see an interesting pattern as shown in Figure 8. One can clearly see that as the length of the answer span increases the F1 score of the model gradually drops. This indicates that the model is better at finding short answers than the long answers in the context. Trying to improve the model to better predict longer answer spans will help to improve the F1 score even more.
 
 
-
+Figure 8 Mean F1 score variation against ground truth answer span length ![](media/fig8.PNG)
 
 
 Another interesting comparison is shown in Figure 9. Here, the average F1 score of the model is compared against the first word of the question in the SQuAD dev set for some common question types.
 
-
+Figure 9 Mean F1 score variation for common question types (based on first word of a question) ![](media/fig9.PNG)
 
 It clearly shows that the model can capture answers for questions “When” and “Who” which typically involve named entities with shorter context but struggles on questions “Why” questions which require deeper logical understanding and longer context. This shows that modifying the model to better understand the context would help to improve its performance on questions that require logical understanding, though its not immediately relevant as how to achieve that.
 Visualization of the Aligned attention embedding layer for a question-context pair is shown in Figure 10. This attention layer signifies which context word is most important to a query word. One can clearly see how the query word “many” attends to the context words “one”, “four”, “appearances”. This shows that this attention mechanism works quite well for this example.
 
 
+Figure 10 Aligned attention layer visualization for a context-question pair ![](media/fig10.PNG)
 
 
 
@@ -86,12 +87,13 @@ Figure 11 shows how the probability mass for the start and end index in the pred
 
 
 
-
+Figure 11 Start-end probabilities over the context ![](media/fig11.PNG)
 
 
 Finally, a contingency table comparing the exact match performance of the baseline model against the improved model for the SQuAD dev set is shown in Table 2.
 
 
+Table 2 Performance of baseline vs improved model ![](media/table.PNG)
 
 
 It shows that though the improved model gains ~5% in overall EM compared to the baseline model, it still incorrectly predicts 8.5% of the examples that is correctly predicted by the baseline model. This shows that a theoretical best of both models would be able to achieve an even higher EM compared to the improved model. Also, both models incorrectly predict 37% of the examples showing that there’s still lots of room for improvement.
