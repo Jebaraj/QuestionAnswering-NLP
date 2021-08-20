@@ -17,7 +17,9 @@ In this paper, I have focused on improving the simplified version of the Documen
 
 This baseline model achieves an EM of 48.25 and a F1 score of 60.43 on the SQuAD dev set while training for 10 epochs and simultaneously evaluating the performance on the SQuAD dev set and when the performance plateaus. (early stopping at 2 epochs).
 The goal is not only to improve the baseline model on the SQuAD dev set but also on the Adversarial SQuAD data set where the baseline model got 37.16 EM and 47.51 F1.
-In the adversarial examples (Jia & Liang, 2017), a distracting sentence is added at the end of the passage. The distracting question is generated from the normal question, by replacing the nouns and adjectives with antonyms and changing the named entities to the nearest word vector representation in GloVe vector space having the same POS. Then, a “fake” answer is generated to this distracted question, having the same POS type as the true answer, and a sentence containing this answer is added to the end of the paragraph as the distracting sentence. This is shown in the Figure 1. The baseline model when evaluated with the same model and hyperparameters against the Adversarial SQuAD dataset gives an EM of 37.16 and 47.51 substantially lower showing that the model does not really generalize to adversarial cases. Furthermore, different variants of the attention mechanism were also explored to try to better capture the interactions between the question and the context.
+In the adversarial examples (Jia & Liang, 2017), a distracting sentence is added at the end of the passage. The distracting question is generated from the normal question, by replacing the nouns and adjectives with antonyms and changing the named entities to the nearest word vector representation in GloVe vector space having the same POS. Then, a “fake” answer is generated to this distracted question, having the same POS type as the true answer, and a sentence containing this answer is added to the end of the paragraph as the distracting sentence. This is shown in the Figure 1. The baseline model when evaluated with the same model and hyperparameters against the Adversarial SQuAD dataset gives an EM of 37.16 and 47.51 substantially lower showing that the model does not really generalize to adversarial cases. 
+Figure 1 AddSent adversary ex. generation: ![](media/fig1.PNG) 
+Furthermore, different variants of the attention mechanism were also explored to try to better capture the interactions between the question and the context.
 
 ## Implementation
 
@@ -25,16 +27,19 @@ In the adversarial examples (Jia & Liang, 2017), a distracting sentence is added
 
 The architecture of the provided baseline model is shown in Figure 2.
 
-
+Figure 2 Baseline model architecture: ![](media/fig2.PNG) 
 
 The first change I implemented was to move the Aligned attention layer which captures the similarity between the passage words and the words in question based on the dot product between nonlinear mappings of word embeddings. Instead of applying the Aligned attention before passing through the RNN network, the Aligned attention was applied after passing through the RNN network, then concatenated with the passage hidden states from the RNN and fed to the Bilinear Attention layers which is now modified to operate along the hidden dimension rather than the embedding dimension as before. This is shown in Figure 3
 
-
+Figure 3 Aligned attention modification: ![](media/fig3.PNG)
 
 The change is party motivated from the lecture on Attentive Reader and to see if there’s any difference to the two methods to apply Aligned attention which overall captures soft alignments between similar but non-identical words (e.g. car and vehicle). However, the results were not promising when evaluated against the SQuAD dev data set and the Adversarial SQuAD with same model parameters and hyperparameters training for the same number of epochs with no shuffling of examples to avoid randomization, the model got an EM of and an F1 and an EM of and an F1 of respectively. This shows that the Aligned attention works best when applied as an embedding to the RNN.
 The next change was motivated from the Bidirectional Attention Flow (BiDAF) model (Seo, Kembhavi, Farhadi, & Hajishirzi, 2017) where in addition to Context2Query attention like the Aligned attention in the DrQA paper, a Query2Context attention was also implemented as shown in Figure 4. Since the architecture of the attention layer BiDAF is very different from the DrQA paper, the Query2Context attention cannot be replicated as it is implemented in the BiDAF. Hence, the Query2Context attention was implemented very similar to the Aligned attention in the DrQA. Here an attention score 𝑎𝑖,𝑗 is computed between passage words 𝑝𝑖 and question words 𝑞𝑗 as shown in Equation (1) and query to context embedding 𝑓𝑞𝑢𝑒𝑟𝑦2𝑐𝑜𝑛𝑡𝑒𝑥𝑡 is computed as shown in Equation (2). 
 `𝑎𝑖,𝑗=𝑆𝑜𝑓𝑡𝑚𝑎𝑥𝑖(𝛼(Ε(𝑝𝑖)).𝛼(Ε(𝑞𝑗))) -----(1) 
 𝑓𝑞𝑢𝑒𝑟𝑦2𝑐𝑜𝑛𝑡𝑒𝑥𝑡= Σ𝑖𝑎𝑖,𝑗Ε(𝑝𝑖) --------(2)`
+
+
+Figure 4 Query2Context attention implementation: ![](media/fig4.PNG)
 
 However, the results did not show any improvement from the baseline model when evaluated against the SQuAD dev data set and the Adversarial SQuAD with same model parameters and hyperparameters training for the same number of epochs with no shuffling of examples to avoid randomization, the model got an EM of 47.53 and an F1 of 59.28 and an EM of 35.93 and an F1 of 46.15 respectively. This shows that the Query2Context attention did not capture any interaction between the context words and the question more meaningful than the Aligned attention in the baseline model.
 
@@ -51,8 +56,9 @@ Finally, instead of using ReLU activation for the Aligned attention, Tanh is cho
 
 Since the SQuAD authors collected three gold answers for every question, the gold answers have varying lengths even for the same question. Figure 5 shows the spread of the maximum and minimum number of words in the SQuAD training set for the gold answers. As you can see in both cases, more than 90% of the answers are short answers having < 5 words, and the windows size of 15 used for the span extraction seems to be a good choice.
 
+Figure 5 Ground truth answer span length distribution: ![](media/fig5.PNG)
 
-
+Figure 6 Model predicted answer span length distribution ![](media/Squad_dev_ans_spread_model_pred.PNG)
 
 One can also clearly see from Figure 6, that model predicted answer spans also has a similar distribution to that of the gold answer span lengths.
 While the macro-averaged F1 score for the best model on the SQuAD dev set is 66.16, it does not explain how the F1 scores vary per example. Figure 7 shows the spread of the F1 score for each example. One can clearly see that there are several occurrences of 0 F1 score, which is impacting the overall macro-averaged F1 score. Improving this will help to improve the overall F1 score of the model.
@@ -94,3 +100,11 @@ It shows that though the improved model gains ~5% in overall EM compared to the 
 
 ## Conclusion
 This report showed how different attention variants were explored to understand the impact on model performance and it also showed how carefully chosen manual features together with additional LSTM layers have helped to boost the baseline model performance while still having similar number of parameters to the baseline model. Furthermore, detailed analysis was performed to show the strengths and weaknesses of the improved model and suggested potential areas to concentrate to improve the model performance in future.
+
+## References
+
+* Chen, D., Fisch, A., Weston, J., & Bordes, A. (2017). Reading Wikipedia to Answer Open-Domain Questions. Association for Computational Linguistics (ACL).
+* Jia, R., & Liang, P. (2017). Adversarial Examples for Evaluating Reading Comprehension Systems. Empirical Methods in Natural Language Processing (EMNLP).
+* Rajpurkar, P., Zhang, J., Lopyrev, K., & Liang, P. (2016). SQuAD: 100,000+ Questions for Machine Comprehension of Text. Empirical Methods in Natural Language Processing (EMNLP).
+* Seo, M., Kembhavi, A., Farhadi, A., & Hajishirzi, H. (2017). Bidirectional Attention Flow for Machine Comprehension. The International Conference on Learning Representations (ICLR).
+* Yerukola, A., & Kamath, A. (2018). Adversarial SQuAD.
